@@ -50,6 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+input_images/
 
 # Translations
 *.mo
@@ -119,6 +120,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+out.png
 
 # Spyder project settings
 .spyderproject
