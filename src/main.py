@@ -1,3 +1,13 @@
+"""
+main.py
+
+Created by Mercury Dev
+Created on 2023-12-16
+
+TODO:
+    - Custom varients
+"""
+
 from PIL import Image, ImageTk
 import tkinter as tk
 from tkinter import filedialog as fd
@@ -6,39 +16,42 @@ from tkinter import ttk
 import serialize as sz
 import tilemap as tm
 
-tiles = []
+initial_width = 32
+initial_height = 32
+tilemap = tm.Tilemap(initial_width, initial_height)
 
 def export_callback():
-    tile_width = int(entry_width.get())
-    tile_height = int(entry_height.get())
-    filename = fd.asksaveasfilename(initialfile = 'out.png', defaultextension=".png")
-    img = tm.create_tilemap_img(tiles, tile_width, tile_height)
+    tilemap.tile_width = int(entry_width.get())
+    tilemap.tile_height = int(entry_height.get())
+    filename = fd.asksaveasfilename(initialfile = f'tilemap_{tilemap.tile_width}x{tilemap.tile_height}.png', defaultextension=".png")
+    img = tilemap.create_tilemap_img()
     img.save(filename)
 
 def add_tile(tile):
-    tiles.append(tile)
-    photo = ImageTk.PhotoImage(tile.img)
+    resized_img = tile.img.resize((32, 32), Image.ANTIALIAS)
+    tilemap.tiles.append(tile)
+
+    photo = ImageTk.PhotoImage(resized_img)
     tree_objects.insert("", tk.END, text=tile.name, image=photo, values=(f"{tile.x},{tile.y}"))
-    
     tree_objects.image_references[tile.name] = photo
 
 def create_tile_callback():
     filename = fd.askopenfilename()
-    add_tile(tm.Tile(0, len(tiles), filename))
+    add_tile(tm.Tile(0, len(tilemap.tiles), filename))
 
 def on_validate(p):
     return p.isdigit()
 
 def file_menu_save_callback():
     file = fd.asksaveasfile(initialfile = 'out.tilemap', defaultextension=".tilemap")
-    serialized_tiles = sz.serialize_tilemap(tiles)
+    serialized_tiles = sz.serialize_tilemap(tilemap)
     file.write(serialized_tiles)
     
 def file_menu_open_callback():
     filename = fd.askopenfilename()
     with open(filename, 'r') as file:
         t = sz.deserialize_tilemap(file.read())
-        for tile in t:
+        for tile in t.tiles:
             add_tile(tile)
 
 window = tk.Tk()
@@ -77,8 +90,9 @@ entry_width = ttk.Entry(frame_columns, validate="key", validatecommand=validate_
 label_height_entry = tk.Label(frame_columns, text="Tile Height (px)")
 entry_height = ttk.Entry(frame_columns, validate="key", validatecommand=validate_num)
 btn_export = ttk.Button(frame_columns, text="Export as PNG", command=export_callback)
-entry_width.insert(0, "32")
-entry_height.insert(0, "32")
+
+entry_width.insert(0, initial_width)
+entry_height.insert(0, initial_height)
 
 label_title.pack()
 label_copyright.pack()

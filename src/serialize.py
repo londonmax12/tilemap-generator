@@ -1,9 +1,18 @@
-import tilemap
+"""
+serialize.py
+
+This script contains the logic to serialize a tilemap in a JSON format
+
+Created by Mercury Dev
+Created on 2023-12-17
+"""
+
+import tilemap as tm
 import json
 
-def serialize_tilemap(tiles):
+def serialize_tilemap(tilemap):
     serialized_tiles = []
-    for tile in tiles:
+    for tile in tilemap.tiles:
         serialized_tile = {
             'position_x': tile.x,
             'position_y': tile.y,
@@ -13,12 +22,13 @@ def serialize_tilemap(tiles):
 
 def deserialize_tilemap(serialized_data):
     serialized_tiles = json.loads(serialized_data)
-    tiles = []
+    tilemap = tm.Tilemap(32, 32)
     for serialized_tile in serialized_tiles:
-        tile = tilemap.Tile(
+        tile = tm.Tile(
             x=serialized_tile['position_x'],
             y=serialized_tile['position_y'],
             image_path=serialized_tile['image_path'],
         )
-        tiles.append(tile)
-    return tiles
+        tilemap.tiles.append(tile)
+
+    return tilemap
