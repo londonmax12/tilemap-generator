@@ -12,21 +12,23 @@ import uuid
 import os
 
 class Tile:
-    def __init__(self, image_path, position) -> None:
-        self.id = str(uuid.uuid4())
+    def __init__(self, image_path, position, id = -1) -> None:
+        self.name = os.path.splitext(os.path.basename(image_path))[0]
+        self.id = str(uuid.uuid4()) if id == -1 else id
         self.x = position[0]
         self.y = position[1]
         self.image_path = image_path
-        base = os.path.basename(image_path)
-        name = os.path.splitext(base)[0]
-        self.name = name
-        self.img = Image.open(image_path)
         self.children = []
-
+        self.set_image()
+     
+    def set_image(self, image_path = ""):
+        try:
+            self.img = Image.open(self.image_path if image_path == "" else image_path)
+        except:
+            self.img = None
+            
     def add_child(self, child_tile):
         self.children.append(child_tile)
-
-
 
 class Tilemap:
     def __init__(self, tile_width, tile_height) -> None:

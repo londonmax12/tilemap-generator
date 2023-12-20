@@ -34,13 +34,8 @@ def serialize_tilemap(tilemap):
     return json.dumps(serialized_data)
 
 def deserialize_tile(json_tile):
-    tile = tm.Tile(
-        image_path=json_tile['image_path'],
-        position=(json_tile['position_x'], json_tile['position_y'])
-    )
-
-    tile.id = json_tile['id']
-
+    tile = tm.Tile(json_tile['image_path'], (json_tile['position_x'], json_tile['position_y']), json_tile['id'])
+        
     if 'children' in json_tile:
         tile.children = [deserialize_tile(child) for child in json_tile['children']]
     

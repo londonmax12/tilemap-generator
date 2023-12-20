@@ -17,8 +17,12 @@ from tkinter import ttk
 
 from serialize import *
 from gui.settings import *
+from gui.message_box import *
 import tilemap as tm
- 
+
+tilemap_filetypes = [("Tilemap File", "*.tilemap")]
+image_filetypes = [('PNG Files','*.png'),('Jpg Files', '*.jpg')]
+
 class GUI:
     def __init__(self) -> None:
         initial_width = 32
@@ -30,10 +34,24 @@ class GUI:
 
         def export_callback():
             filename = fd.asksaveasfilename(initialfile = f'tilemap_{tilemap.tile_width}x{tilemap.tile_height}.png', defaultextension=".png")
-            img = tilemap.create_tilemap_img()
-            img.save(filename)
+            if filename:
+                img = tilemap.create_tilemap_img()
+                img.save(filename)
 
         def add_tile(tile, table_id=""):
+            if not tile.img:
+                popup = MessageBox(f"Failed to load tile image: {tile.name}\nWould you like to relocate image?", PopupType.WARNING)
+                result = popup.display()
+                if result:
+                    image_file_path = fd.askopenfilename(filetypes=image_filetypes)
+                    if image_file_path:
+                        tile.image_path = image_file_path
+                        tile.set_image()
+                    else:
+                        tile.set_image("assets/warning_icon.png")
+                else:
+                    tile.set_image("assets/warning_icon.png")
+
             resized_img = tile.img.resize((32, 32))
             
             if table_id == "":
@@ -47,23 +65,29 @@ class GUI:
                 add_tile(child, tree_id)
 
         def create_tile():
-            filename = fd.askopenfilename()
-            add_tile(tm.Tile(filename, tilemap.get_next_tile_position()))
+            filename = fd.askopenfilename(filetypes=image_filetypes)
+            if filename:
+                add_tile(tm.Tile(filename, tilemap.get_next_tile_position()))
 
         def create_tile_callback():
             create_tile()
 
         def file_menu_save_callback():
-            file = fd.asksaveasfile(initialfile = 'out.tilemap', defaultextension=".tilemap")
-            serialized_tiles = serialize_tilemap(tilemap)
-            file.write(serialized_tiles)
+            filename = fd.asksaveasfile(initialfile = 'out.tilemap', defaultextension=".tilemap")
+            if filename:
+                serialized_tiles = serialize_tilemap(tilemap)
+                filename.write(serialized_tiles)
 
         def file_menu_open_callback():
-            filename = fd.askopenfilename()
-            with open(filename, 'r') as file:
-                deserialized_tilemap = deserialize_tilemap(file.read())
-                for tile in deserialized_tilemap.tiles:
-                    add_tile(tile)
+            global tilemap
+            
+            filename = fd.askopenfilename(filetypes=tilemap_filetypes)
+            if filename:
+                tilemap = tm.Tilemap(initial_width, initial_height)
+                with open(filename, 'r') as file:
+                    deserialized_tilemap = deserialize_tilemap(file.read())
+                    for tile in deserialized_tilemap.tiles:
+                        add_tile(tile)
 
         def update_right_panel(event):
             global selected_tile
@@ -79,10 +103,11 @@ class GUI:
                 widget.destroy()
 
             def add_variant_callback():
-                filename = fd.askopenfilename()
-                t = tm.Tile(filename, tilemap.get_next_tile_position(selected_tile))
-                add_tile(t, selected_item)
-                selected_tile.add_child(t)
+                filename = fd.askopenfilename(filetypes=image_filetypes)
+                if filename:
+                    t = tm.Tile(filename, tilemap.get_next_tile_position(selected_tile))
+                    add_tile(t, selected_item)
+                    selected_tile.add_child(t)
 
             if selected_tile:
                 label_tile_name = tk.Label(frame_right, text=f"Tile Name: {selected_tile.name}")
