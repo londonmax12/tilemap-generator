@@ -126,25 +126,39 @@ class GUI:
 
             def generate_varient_callback():
                 GenerateVariant(self.root, selected_tile, add_varient_to_table, selected_item)
-           
+            
+            def on_name_edit(event):
+                new_name = entry_tile_name.get()
+                if selected_tile and new_name:
+                    selected_tile.name = new_name
+
+                    selected_item = tree_objects.selection()
+                    if selected_item:
+                        tree_objects.item(selected_item, text=new_name)
+
             if selected_tile:
-                photo_image = ImageTk.PhotoImage(selected_tile.img)
+                resized_img = selected_tile.img.resize((128, 128))
+                photo_image = ImageTk.PhotoImage(resized_img)
                 label_tile_image = tk.Label(frame_right, image=photo_image)
                 label_tile_image.image = photo_image
-                label_tile_name = tk.Label(frame_right, text=f"Tile Name: {selected_tile.name}")
+
+                entry_tile_name = ttk.Entry(frame_right)
+                entry_tile_name.insert(0, selected_tile.name)
+                entry_tile_name.bind("<Return>", on_name_edit)
+
                 label_tile_position = tk.Label(frame_right, text=f"Position: {selected_tile.x}, {selected_tile.y}")
 
                 btn_add_variant = ttk.Button(frame_right, text="Create Child", command=add_child_callback)
                 btn_generate_variant = ttk.Button(frame_right, text="Generate Variant", command=generate_varient_callback)
                 
-                label_tile_image.pack()
-                label_tile_name.pack(anchor="w")
+                label_tile_image.pack(pady=6)
+                entry_tile_name.pack(anchor="w")
                 label_tile_position.pack(anchor="w")
                 btn_add_variant.pack(anchor="w")
                 btn_generate_variant.pack(anchor="w")
 
         self.root = window = tk.Tk()
-        self.root.resizable(width=True, height=True)
+        self.root.resizable(width=False, height=False)
 
         style = ttk.Style()
         style.configure("Treeview", rowheight=40)
