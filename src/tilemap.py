@@ -19,9 +19,9 @@ class TileVariation:
         self.name = name
 
 class Tile:
-    def __init__(self, image_path, position, id = -1) -> None:
-        self.name = os.path.splitext(os.path.basename(image_path))[0]
-        self.id = str(uuid.uuid4()) if id == -1 else id
+    def __init__(self, image_path, position, id = None, name = None) -> None:
+        self.name = name if name else os.path.splitext(os.path.basename(image_path))[0] 
+        self.id = id if id else str(uuid.uuid4())
         self.x = position[0]
         self.y = position[1]
         self.image_path = image_path

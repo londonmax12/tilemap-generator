@@ -128,16 +128,20 @@ class GUI:
                 GenerateVariant(self.root, selected_tile, add_varient_to_table, selected_item)
            
             if selected_tile:
+                photo_image = ImageTk.PhotoImage(selected_tile.img)
+                label_tile_image = tk.Label(frame_right, image=photo_image)
+                label_tile_image.image = photo_image
                 label_tile_name = tk.Label(frame_right, text=f"Tile Name: {selected_tile.name}")
                 label_tile_position = tk.Label(frame_right, text=f"Position: {selected_tile.x}, {selected_tile.y}")
 
                 btn_add_variant = ttk.Button(frame_right, text="Create Child", command=add_child_callback)
                 btn_generate_variant = ttk.Button(frame_right, text="Generate Variant", command=generate_varient_callback)
                 
-                label_tile_name.pack()
-                label_tile_position.pack()
-                btn_add_variant.pack()
-                btn_generate_variant.pack()
+                label_tile_image.pack()
+                label_tile_name.pack(anchor="w")
+                label_tile_position.pack(anchor="w")
+                btn_add_variant.pack(anchor="w")
+                btn_generate_variant.pack(anchor="w")
 
         self.root = window = tk.Tk()
         self.root.resizable(width=True, height=True)
@@ -166,7 +170,8 @@ class GUI:
 
         frame_columns = tk.Frame(window)
 
-        frame_right = tk.Frame(frame_columns)
+        frame_right = tk.Frame(frame_columns, width=200, height=400)
+        frame_right.pack_propagate(False)
         frame_right.grid(row=0, column=1, padx=10)
 
         columns = ("position")

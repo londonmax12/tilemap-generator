@@ -16,6 +16,7 @@ def serialize_tile(tile):
         'id': tile.id,
         'position_x': tile.x,
         'position_y': tile.y,
+        'name': tile.name, 
         'image_path': tile.image_path,
         'variations': serialized_variations,
         'children': [serialize_tile(child) for child in tile.children]
@@ -31,7 +32,7 @@ def deserialize_variation(json_variation):
     )
 
 def deserialize_tile(json_tile):
-    tile = tm.Tile(json_tile['image_path'], (json_tile['position_x'], json_tile['position_y']), json_tile['id'])
+    tile = tm.Tile(json_tile['image_path'], (json_tile['position_x'], json_tile['position_y']), json_tile['id'], json_tile['name'])
         
     if 'variations' in json_tile:
         tile.variations = [deserialize_variation(variation) for variation in json_tile['variations']]
