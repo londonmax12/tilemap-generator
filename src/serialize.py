@@ -1,24 +1,45 @@
-"""
-serialize.py
-
-This script contains the logic to serialize a tilemap in a JSON format
-
-Created by Mercury Dev
-Created on 2023-12-17
-"""
-
 import tilemap as tm
 import json
 
+def serialize_variation(variation):
+    return {
+        'x': variation.x,
+        'y': variation.y,
+        'name': variation.name,
+        'rotation': variation.rotation
+    }
+
 def serialize_tile(tile):
+    serialized_variations = [serialize_variation(variation) for variation in tile.variations]
+
     serialized_tile = {
         'id': tile.id,
         'position_x': tile.x,
         'position_y': tile.y,
         'image_path': tile.image_path,
+        'variations': serialized_variations,
         'children': [serialize_tile(child) for child in tile.children]
     }
     return serialized_tile
+
+def deserialize_variation(json_variation):
+    return tm.TileVariation(
+        x = json_variation['x'],
+        y = json_variation['y'],
+        name = json_variation['name'],
+        rotation = json_variation['rotation']
+    )
+
+def deserialize_tile(json_tile):
+    tile = tm.Tile(json_tile['image_path'], (json_tile['position_x'], json_tile['position_y']), json_tile['id'])
+        
+    if 'variations' in json_tile:
+        tile.variations = [deserialize_variation(variation) for variation in json_tile['variations']]
+    
+    if 'children' in json_tile:
+        tile.children = [deserialize_tile(child) for child in json_tile['children']]
+    
+    return tile
 
 def serialize_tilemap(tilemap):
     serialized_tiles = [serialize_tile(tile) for tile in tilemap.tiles]
@@ -32,14 +53,6 @@ def serialize_tilemap(tilemap):
     }
 
     return json.dumps(serialized_data)
-
-def deserialize_tile(json_tile):
-    tile = tm.Tile(json_tile['image_path'], (json_tile['position_x'], json_tile['position_y']), json_tile['id'])
-        
-    if 'children' in json_tile:
-        tile.children = [deserialize_tile(child) for child in json_tile['children']]
-    
-    return tile
 
 def deserialize_tilemap(serialized_data):
     serialized_data = json.loads(serialized_data)
