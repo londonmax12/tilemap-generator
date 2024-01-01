@@ -33,7 +33,7 @@ class GUI:
         def open_settings_popup():
             Settings(self.root, tilemap)
 
-        def export_callback():
+        def file_menu_export_callback():
             filename = fd.asksaveasfilename(initialfile = f'tilemap_{tilemap.tile_width}x{tilemap.tile_height}.png', defaultextension=".png")
             if filename:
                 img = tilemap.create_tilemap_img()
@@ -110,7 +110,6 @@ class GUI:
                 selected_tile_name = tree_objects.item(selected_item)['text']
                 selected_tile = tilemap.get_tile_by_name(selected_tile_name)
 
-
             for widget in frame_right.winfo_children():
                 widget.destroy()
 
@@ -142,20 +141,20 @@ class GUI:
                 label_tile_image = tk.Label(frame_right, image=photo_image)
                 label_tile_image.image = photo_image
 
-                entry_tile_name = ttk.Entry(frame_right)
+                entry_tile_name = ttk.Entry(frame_right, width=20)
                 entry_tile_name.insert(0, selected_tile.name)
                 entry_tile_name.bind("<Return>", on_name_edit)
 
                 label_tile_position = tk.Label(frame_right, text=f"Position: {selected_tile.x}, {selected_tile.y}")
 
-                btn_add_variant = ttk.Button(frame_right, text="Create Child", command=add_child_callback)
-                btn_generate_variant = ttk.Button(frame_right, text="Generate Variant", command=generate_varient_callback)
+                btn_add_variant = ttk.Button(frame_right, width=20, text="Create Child", command=add_child_callback)
+                btn_generate_variant = ttk.Button(frame_right, width=20, text="Generate Variant", command=generate_varient_callback)
                 
                 label_tile_image.pack(pady=6)
-                entry_tile_name.pack(anchor="w")
-                label_tile_position.pack(anchor="w")
-                btn_add_variant.pack(anchor="w")
-                btn_generate_variant.pack(anchor="w")
+                entry_tile_name.pack()
+                label_tile_position.pack()
+                btn_add_variant.pack()
+                btn_generate_variant.pack()
 
         self.root = window = tk.Tk()
         self.root.resizable(width=False, height=False)
@@ -165,11 +164,17 @@ class GUI:
 
         menubar = tk.Menu(self.root)
 
+        
         file_menu = tk.Menu(menubar, tearoff=0)
+        export_menu = tk.Menu(file_menu, tearoff=0)
+        export_menu.add_command(label="Export as PNG", command=file_menu_export_callback)
+        
         file_menu.add_command(label="Open", command=file_menu_open_callback)
         file_menu.add_command(label="Save", command=file_menu_save_callback)
+        file_menu.add_cascade(label="Export", menu=export_menu)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=window.destroy)
+        file_menu.add_command(label="By Mercury Dev", state=tk.DISABLED)
 
         tilemap_menu = tk.Menu(menubar, tearoff=0)
         tilemap_menu.add_command(label="Settings", command=open_settings_popup)
@@ -178,12 +183,8 @@ class GUI:
         menubar.add_cascade(label="Tilemap", menu=tilemap_menu)
 
         window.config(menu=menubar)
-
-        label_title = tk.Label(text="Tilemap Generator", font=('Helvetica', 18, 'bold'))
-        label_copyright = tk.Label(text="By Mercury Dev")
-
+        
         frame_columns = tk.Frame(window)
-
         frame_right = tk.Frame(frame_columns, width=200, height=400)
         frame_right.pack_propagate(False)
         frame_right.grid(row=0, column=1, padx=10)
@@ -192,21 +193,16 @@ class GUI:
         tree_objects = ttk.Treeview(frame_columns, columns=columns, height=10)
         tree_objects.heading("#0", text="Tile")
         tree_objects.heading("position", text="Position")
-        tree_objects.column("position", width=200)
+        tree_objects.column("position", width=170)
         tree_objects.image_references = {}
         tree_objects.bind("<ButtonRelease-1>", update_right_panel)
 
         btn_add_tile = ttk.Button(frame_columns, text="Create Tile", command=create_tile)
 
-        btn_export = ttk.Button(frame_columns, text="Export as PNG", command=export_callback)
-
-        label_title.pack()
-        label_copyright.pack()
         frame_columns.pack(padx=10, pady=10)
 
         tree_objects.grid(row=0, column=0, padx=10, rowspan=8)
         btn_add_tile.grid(row=8, column=0, padx=10)
-        btn_export.grid(row=8, column=1, padx=10, pady=(10, 5))
 
     def start(self):
         self.root.mainloop()

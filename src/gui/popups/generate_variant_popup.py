@@ -22,20 +22,26 @@ class GenerateVariant:
         self.entry_rotation.grid(row=1, column=1)
         self.entry_rotation.bind("<Return>", self.update_from_entry)
 
-        self.frame_rotation.grid(row=1, column=0, padx=10, sticky="n")
+        self.label_tile_name = tk.Label(self.window, text=tile.name)
+        self.label_tile_name.grid(row=0, column=0)
+
+        self.label_variant_name = tk.Label(self.window, text="Variant Name")
+        self.label_variant_name.grid(row=1, column=0, pady=5, sticky="s")
+        self.entry_variant_name = ttk.Entry(self.window, width=20)
+        self.entry_variant_name.grid(row=2, column=0, pady=5, sticky="n")
+
+        self.frame_rotation.grid(row=3, column=0, padx=10, sticky="n")
 
         self.rotation_angle = 0
 
-        self.label_tile_name = tk.Label(self.window, text=tile.name)
-        self.label_tile_name.grid(row=0, column=1)
 
         self.photo_image = ImageTk.PhotoImage(tile.img.rotate(self.rotation_angle))
         self.label_image = tk.Label(self.window, image=self.photo_image)
         self.label_image.image = self.photo_image
-        self.label_image.grid(row=1, column=1, pady=10, padx=10)
-        
+        self.label_image.grid(row=1, column=1, pady=10, padx=10, rowspan=3)
+
         self.button_apply = ttk.Button(self.window, text="Apply", command=self.apply)
-        self.button_apply.grid(row=2, column=0, pady=10, padx=10, columnspan=2)
+        self.button_apply.grid(row=4, column=0, pady=10, padx=10, columnspan=2)
         
     def validate_entry(self, new_value):
         try:
@@ -70,7 +76,9 @@ class GenerateVariant:
         self.entry_rotation.insert(0, str(self.rotation_angle))
     
     def apply(self):
+        variant_name = self.entry_variant_name.get()
         v = self.tile.add_variation(self.rotation_angle)
+        v.name = variant_name
 
         if self.add_variant_callback:
             self.add_variant_callback(self.tile, v, self.table_id)
