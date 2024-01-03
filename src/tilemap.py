@@ -89,7 +89,6 @@ class Tilemap:
             tile_resized_img = tile.img.resize((self.tile_width, self.tile_height), Image.ANTIALIAS)
             out_img.paste(tile_resized_img, (self.tile_width * tile.x, self.tile_height * tile.y))
 
-
         return out_img
     
     def get_next_tile_position(self, tile_parent=None):

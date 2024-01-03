@@ -33,11 +33,39 @@ class GUI:
         def open_settings_popup():
             Settings(self.root, tilemap)
 
-        def file_menu_export_callback():
+        def file_menu_export_png_callback():
             filename = fd.asksaveasfilename(initialfile = f'tilemap_{tilemap.tile_width}x{tilemap.tile_height}.png', defaultextension=".png")
             if filename:
                 img = tilemap.create_tilemap_img()
                 img.save(filename)
+
+        def file_menu_export_gdscript_callback():
+            filename = fd.asksaveasfilename(initialfile = f'TilemapData.gd', defaultextension=".gd")
+            if filename:
+                def add_children(t):
+                    content = f'    "{t.name}": Vector2i({t.x}, {t.y}),\n'
+                    for v in t.variations:
+                        content += f'    "{v.name}": Vector2i({v.x}, {v.y}),\n'
+                    for c in t.children:
+                        content += add_children(c)
+                    return content
+
+                dictionary_content = ""
+                for t in tilemap.tiles:
+                    dictionary_content += add_children(t)
+
+                gd_code = f"""extends Node
+
+var tilename_to_position = {{
+{dictionary_content}
+}}
+
+func get_tile(tilename: String) -> Vector2i:
+    return tilename_to_position.get(tilename, Vector2i(0, 0))
+"""
+
+                with open(filename, "w") as file:
+                    file.write(gd_code)
 
         def add_variant(tile, variant, table_id):
             image = tile.get_variant_img(variant)
@@ -163,11 +191,12 @@ class GUI:
         style.configure("Treeview", rowheight=40)
 
         menubar = tk.Menu(self.root)
-
         
         file_menu = tk.Menu(menubar, tearoff=0)
         export_menu = tk.Menu(file_menu, tearoff=0)
-        export_menu.add_command(label="Export as PNG", command=file_menu_export_callback)
+        export_menu.add_command(label="Export as PNG", command=file_menu_export_png_callback)
+        export_menu.add_separator()
+        export_menu.add_command(label="Export as GDScript", command=file_menu_export_gdscript_callback)
         
         file_menu.add_command(label="Open", command=file_menu_open_callback)
         file_menu.add_command(label="Save", command=file_menu_save_callback)
